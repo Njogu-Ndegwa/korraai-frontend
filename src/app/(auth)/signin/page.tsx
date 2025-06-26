@@ -144,7 +144,7 @@ const LoginPage = () => {
           
           // Redirect after a short delay to show success message
           setTimeout(() => {
-            router.push('/conversations'); // or wherever you want to redirect
+            router.push('/dashboards'); // or wherever you want to redirect
           }, 1500);
         } else {
           setError('Invalid response from server');
