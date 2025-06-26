@@ -1359,7 +1359,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
     return (
         <div className={`flex flex-col bg-white ${isMobile ? 'h-screen' : 'flex-1'}`}>
             {/* Mobile header */}
-            {isMobile && (
+            {true && (
                 <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-100 flex-shrink-0">
                     <div className="p-3">
                         <div className="flex items-center justify-between">

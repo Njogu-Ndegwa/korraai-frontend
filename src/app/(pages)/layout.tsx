@@ -1,4 +1,4 @@
-// ===== app/layout.tsx (Root Layout - Single Layout for Everything) =====
+// ===== app/layout.tsx (Root Layout - Updated) =====
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -38,6 +38,9 @@ export default function RootLayout({ children }: RootLayoutProps) {
 
   // Check if current route should show the dashboard layout
   const shouldShowDashboardLayout = pathname !== '/auth' && pathname !== '/login' && pathname !== '/signup';
+  
+  // Check if current route should hide TopNav (conversations page has its own header)
+  const shouldHideTopNav = pathname.startsWith('/conversations');
 
   return (
     <html lang="en">
@@ -46,23 +49,27 @@ export default function RootLayout({ children }: RootLayoutProps) {
           // Dashboard Layout with Sidebar + TopNav
           <div className="h-screen bg-gray-100 overflow-hidden">
             <div className="h-full flex">
-              {/* Sidebar */}
-              <Sidebar
-                isMobile={isMobile}
-                isOpen={sidebarOpen}
-                onClose={() => setSidebarOpen(false)}
-              />
+              {/* Sidebar - Hide on mobile when showing conversations */}
+              {(!isMobile || !shouldHideTopNav) && (
+                <Sidebar
+                  isMobile={isMobile}
+                  isOpen={sidebarOpen}
+                  onClose={() => setSidebarOpen(false)}
+                />
+              )}
               
               {/* Main Content */}
               <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Top Navigation */}
-                <TopNav
-                  isMobile={isMobile}
-                  setSidebarOpen={setSidebarOpen}
-                />
+                {/* Top Navigation - Hide for conversations page */}
+                {!shouldHideTopNav && (
+                  <TopNav
+                    isMobile={isMobile}
+                    setSidebarOpen={setSidebarOpen}
+                  />
+                )}
                 
                 {/* Content Area */}
-                <div className="flex-1 overflow-hidden">
+                <div className={`flex-1 overflow-hidden ${shouldHideTopNav ? 'h-full' : ''}`}>
                   {children}
                 </div>
               </div>
