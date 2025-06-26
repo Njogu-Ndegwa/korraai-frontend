@@ -1360,73 +1360,63 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
         <div className={`flex flex-col bg-white ${isMobile ? 'h-screen' : 'flex-1'}`}>
             {/* Mobile header */}
             {isMobile && (
-                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-100 flex-shrink-0">
-                    <div className="p-3">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <button
-                                    onClick={onBack}
-                                    className="p-2 hover:bg-white/60 rounded-full text-indigo-700 transition-colors flex-shrink-0"
-                                    aria-label="Go back to conversations list"
-                                >
-                                    <ArrowLeft size={20} className="text-indigo-600" />
-                                </button>
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-100 flex-shrink-0 p-3">
+                    <div className="flex items-center justify-between">
+                        {/* Left side - Back button + Customer info */}
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                            <button
+                                onClick={onBack}
+                                className="p-1.5 hover:bg-white/60 rounded-full text-indigo-700 transition-colors flex-shrink-0"
+                                aria-label="Go back to conversations list"
+                            >
+                                <ArrowLeft size={18} className="text-indigo-600" />
+                            </button>
 
-                                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                                    {customerName.charAt(0).toUpperCase()}
-                                </div>
-
-                                <div className="flex-1 min-w-0">
-                                    <div className="font-semibold text-indigo-900 text-sm truncate">{customerName}</div>
-                                    <div className="text-xs text-indigo-600 flex items-center gap-1">
-                                        <span className="truncate">{platformName}</span>
-                                        <span className="text-indigo-400">•</span>
-                                        {currentHandlerType === 'ai' ? (
-                                            <span className="flex items-center gap-1 flex-shrink-0">
-                                                <Bot size={10} />
-                                                AI Active
-                                            </span>
-                                        ) : (
-                                            <span className="flex items-center gap-1 flex-shrink-0">
-                                                <User size={10} />
-                                                Human
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
+                            <div className="w-7 h-7 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xs flex-shrink-0">
+                                {customerName.charAt(0).toUpperCase()}
                             </div>
 
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <button
-                                    onClick={handleToggleAI}
-                                    disabled={loading || isToggling}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiEnabled
-                                        ? 'bg-purple-500 hover:bg-purple-600 text-white'
-                                        : 'bg-white/60 hover:bg-white text-indigo-700'
-                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
-                                >
-                                    {isToggling ? (
-                                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                                    ) : (
-                                        aiEnabled ? '🤖 ON' : '✨ OFF'
+                            <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-indigo-900 text-sm truncate">{customerName}</div>
+                                <div className="text-xs text-indigo-600 flex items-center gap-1">
+                                    <span className="truncate">{platformName}</span>
+                                    {/* Visual AI indicator with dot */}
+                                    {currentHandlerType === 'ai' && (
+                                        <>
+                                            <span className="text-indigo-400">•</span>
+                                            <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse flex-shrink-0"></div>
+                                            <span className="text-purple-600 font-medium flex-shrink-0">AI</span>
+                                        </>
                                     )}
-                                </button>
-
-                                <button className="p-2 hover:bg-white/60 rounded-full text-indigo-700 transition-colors">
-                                    <MoreHorizontal size={16} className="text-indigo-600" />
-                                </button>
+                                </div>
                             </div>
+                        </div>
+
+                        {/* Right side - Compact AI toggle + More */}
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                                onClick={handleToggleAI}
+                                disabled={loading || isToggling}
+                                className={`px-2.5 py-1 rounded-md text-xs font-medium transition-all ${aiEnabled
+                                    ? 'bg-purple-500 hover:bg-purple-600 text-white'
+                                    : 'bg-white/60 hover:bg-white text-indigo-700'
+                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            >
+                                {isToggling ? (
+                                    <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin"></div>
+                                ) : (
+                                    <span className="flex items-center gap-1">
+                                        {aiEnabled ? '🤖' : '✨'}
+                                        <span className="hidden xs:inline">{aiEnabled ? 'ON' : 'OFF'}</span>
+                                    </span>
+                                )}
+                            </button>
+
+                            <button className="p-1.5 hover:bg-white/60 rounded-full text-indigo-700 transition-colors">
+                                <MoreHorizontal size={14} className="text-indigo-600" />
+                            </button>
                         </div>
                     </div>
-
-                    {aiEnabled && (
-                        <div className="px-3 pb-2">
-                            <div className="bg-purple-100 border border-purple-200 rounded-lg px-3 py-2 flex items-center gap-2">
-                                <Bot size={14} className="text-purple-600 animate-pulse" />
-                                <span className="text-purple-700 font-medium text-xs">AI is actively responding to this customer</span>
-                            </div>
-                        </div>
-                    )}
                 </div>
             )}
 
