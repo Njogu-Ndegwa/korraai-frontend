@@ -12,7 +12,7 @@ interface DecodedToken {
 
 export const getDecodedToken = (): any | null => {
   if (typeof window !== 'undefined') {
-    const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUxNTY2MjY0LCJpYXQiOjE3NTA5NjE0NjQsImp0aSI6IjIzNDUxMDEzMjhhYjQ5NGRiM2U5YzhmMjVmZTJlODliIiwidXNlcl9pZCI6Ijg4MjgwYTkyLTdhYjItNDVlZC05NmI4LWNjMmZiZDJlZTUzOSIsInRlbmFudF9pZCI6IjQ5NTkyYzA1LWU0ZjYtNGFlMS1iYTIxLTllNTAzNDE3MWZmYSIsInRlbmFudF9uYW1lIjoiU3ByaW5nIEludGVybmF0aW9uYWwgVHJhaW5pbmcgQ29sbGVnZSIsInVzZXJfcm9sZSI6ImFkbWluIiwiZW1haWwiOiJhZG1pbkBzaXRjLmNvbSJ9.E3ncG8jbBQ5HCqZLMPIRHi4WpbDU9efaD9gPqXWQ7GY"
+    const token = localStorage.getItem("access_token")
     console.log(token, "Token---17----")
     if (token) {
       try {
@@ -39,7 +39,7 @@ export const isAuthenticated = (): boolean => {
   return getDecodedToken() !== null;
 };
 
-const PUBLIC_ROUTES = ["/messages", "/dashboards", "/signin", "/signup"] as const;
+const PUBLIC_ROUTES = ["/messdddages", "/dashbddoards", "/signin", "/signup"] as const;
 
 export function isAuth(Component: any) {
   return function ProtectedPage(props: any) {
@@ -53,6 +53,8 @@ export function isAuth(Component: any) {
 
     /** Client-side redirect for unauthenticated users on private pages */
     useEffect(() => {
+        console.log(loggedIn, "----56")
+        console.log(isPublic, "Issdfds57")
       if (!loggedIn && !isPublic) {
         router.replace("/signin");
       }

@@ -629,6 +629,7 @@ interface SidebarProps {
   isMobile: boolean;
   isOpen: boolean;
   onClose: () => void;
+  totalUnreadCount?: number; // ADD THIS
 }
 
 interface MenuItem {
@@ -644,7 +645,8 @@ interface MenuItem {
 export const Sidebar: React.FC<SidebarProps> = ({ 
   isMobile, 
   isOpen, 
-  onClose 
+  onClose,
+  totalUnreadCount = 0 
 }) => {
   const pathname = usePathname();
   const router = useRouter();
@@ -662,7 +664,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: MessageCircle, 
       label: 'Chats', 
       href: '/conversations',
-      count: 6 
+      count: totalUnreadCount > 0 ? totalUnreadCount : null
     },
     { 
       id: 'calls', 
