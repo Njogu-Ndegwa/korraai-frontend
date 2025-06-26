@@ -873,6 +873,7 @@ export const ChatList: React.FC<ChatListProps> = ({ conversations, selectedConve
 
 // Updated ChatMessages component with clear visual distinctions
 // Updated ChatMessages component with mobile fixes
+// Updated ChatMessages component with sticky back navigation
 const ChatMessages: React.FC<ChatMessagesProps> = ({
     selectedConversation,
     messages,
@@ -987,17 +988,29 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
     const aiEnabled = selectedConversation.ai_enabled ?? false;
 
     return (
-        // ✅ FIX 1: Add proper height constraints for mobile
-        <div className={`flex flex-col bg-white ${isMobile ? 'h-screen' : 'flex-1'}`}>
-            {/* Chat Header - ✅ FIX 2: Enhanced mobile header with prominent back button */}
+        <div className={`flex flex-col bg-white ${isMobile ? 'h-screen' : 'flex-1'} relative`}>
+            {/* ✅ NEW: Sticky Back Button for Mobile (Always Visible) */}
+            {isMobile && (
+                <div className="absolute top-4 left-4 z-50">
+                    <button
+                        onClick={onBack}
+                        className="bg-white/90 backdrop-blur-sm hover:bg-white border border-gray-200 rounded-full p-3 shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 active:scale-95"
+                        aria-label="Go back to conversations list"
+                    >
+                        <ArrowLeft size={20} className="text-gray-700" />
+                    </button>
+                </div>
+            )}
+
+            {/* Chat Header - ✅ Modified for mobile with back button space */}
             <div className="p-4 border-b border-gray-100 bg-white shadow-sm flex-shrink-0">
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        {/* ✅ FIX 3: Make back button more prominent and always visible on mobile */}
-                        {isMobile && (
+                    <div className={`flex items-center gap-3 ${isMobile ? 'ml-16' : ''}`}>
+                        {/* ✅ Back button for desktop only (mobile uses floating button) */}
+                        {!isMobile && (
                             <button
                                 onClick={onBack}
-                                className="p-2 hover:bg-gray-100 rounded-lg text-gray-700 transition-colors flex-shrink-0 mr-2"
+                                className="p-2 hover:bg-gray-100 rounded-lg text-gray-700 transition-colors flex-shrink-0"
                                 aria-label="Go back to conversations list"
                             >
                                 <ArrowLeft size={24} className="text-gray-600" />
@@ -1027,7 +1040,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                         </div>
                     </div>
 
-                    {/* ✅ FIX 4: Responsive header actions */}
+                    {/* Header actions */}
                     <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                             onClick={handleToggleAI}
@@ -1055,7 +1068,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                 </div>
             </div>
 
-            {/* Messages - ✅ FIX 5: Proper scroll container with mobile-optimized padding */}
+            {/* Messages - with proper scroll container */}
             <div className={`flex-1 overflow-y-auto space-y-4 bg-gradient-to-b from-gray-50 to-white ${isMobile ? 'p-4' : 'p-6'}`}>
                 {messages && messages.length > 0 ? (
                     messages.map((message: Message) => {
@@ -1071,7 +1084,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                 className={`flex ${justifyClass} animate-fadeIn`}
                             >
                                 <div className={`max-w-[70%] ${isMobile ? 'max-w-[85%]' : ''}`}>
-                                    {/* Sender info - show for all message types but style differently */}
+                                    {/* Sender info */}
                                     <div className={`flex items-center gap-2 mb-2 text-xs ${isCustomer ? 'justify-start' : 'justify-end'}`}>
                                         <div className={`flex items-center gap-2 ${isCustomer ? 'text-gray-500' : isAI ? 'text-purple-200' : 'text-emerald-200'}`}>
                                             {isCustomer && <User size={14} />}
@@ -1088,7 +1101,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                         {renderMessageContent(message.content_encrypted || '')}
                                     </div>
 
-                                    {/* Message footer with timestamp and status */}
+                                    {/* Message footer */}
                                     <div className={`flex items-center gap-2 mt-2 text-xs text-gray-500 ${isCustomer ? 'justify-start' : 'justify-end'}`}>
                                         <span>{formatTime(message.platform_timestamp)}</span>
                                         {(isAI || isHuman) && (
@@ -1121,7 +1134,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Message Input - ✅ FIX 6: Mobile-optimized input with proper constraints */}
+            {/* Message Input */}
             {currentHandlerType === 'human' ? (
                 <div className={`border-t border-gray-100 bg-white flex-shrink-0 ${isMobile ? 'p-4' : 'p-6'}`}>
                     {!isMobile && (
