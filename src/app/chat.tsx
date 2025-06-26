@@ -613,7 +613,264 @@ export const ChatList: React.FC<ChatListProps> = ({ conversations, selectedConve
     );
 };
 
-// Chat Messages Component
+// // Chat Messages Component
+// const ChatMessages: React.FC<ChatMessagesProps> = ({
+//     selectedConversation,
+//     messages,
+//     newMessage,
+//     setNewMessage,
+//     sendMessage,
+//     toggleAIControl,
+//     loading,
+//     onBack,
+//     isMobile
+// }) => {
+//     const messagesEndRef = useRef<HTMLDivElement>(null);
+//     const [isToggling, setIsToggling] = useState(false);
+
+//     useEffect(() => {
+//         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+//     }, [messages]);
+
+//     const formatTime = (timestamp: string): string => {
+//         if (!timestamp) return '';
+//         try {
+//             const date = new Date(timestamp);
+//             return date.toLocaleTimeString('en-US', {
+//                 hour: '2-digit',
+//                 minute: '2-digit',
+//                 hour12: true
+//             });
+//         } catch (error) {
+//             console.error('Error formatting time:', error);
+//             return '';
+//         }
+//     };
+
+//     const renderMessageContent = (content: string): ReactElement => {
+//         if (!content) return <div></div>;
+
+//         try {
+//             let formatted: string = content
+//                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+//                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
+//                 .replace(/\n/g, '<br>')
+//                 .replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline">$1</a>');
+
+//             return <div dangerouslySetInnerHTML={{ __html: formatted }} />;
+//         } catch (error) {
+//             console.error('Error rendering message content:', error);
+//             return <div>{content}</div>;
+//         }
+//     };
+
+//     const handleToggleAI = async () => {
+//         if (!selectedConversation || isToggling) return;
+
+//         setIsToggling(true);
+//         try {
+//             await toggleAIControl();
+//         } catch (error) {
+//             console.error('Error toggling AI:', error);
+//             // You might want to show a toast notification here
+//         } finally {
+//             setIsToggling(false);
+//         }
+//     };
+
+//     // Safety check for selectedConversation
+//     if (!selectedConversation) {
+//         return (
+//             <div className="flex-1 flex items-center justify-center bg-gray-50">
+//                 <div className="text-center text-gray-500">
+//                     <div className="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center mx-auto mb-4">
+//                         <MessageCircle size={32} className="text-gray-600" />
+//                     </div>
+//                     <h3 className="text-2xl font-bold mb-2 text-gray-700">Select a conversation</h3>
+//                     <p className="text-gray-500">Choose a conversation to start messaging</p>
+//                 </div>
+//             </div>
+//         );
+//     }
+
+//     // Additional safety checks
+//     const customerName = selectedConversation.customer_name || 'Unknown';
+//     const platformName = selectedConversation.platform_name || 'Unknown Platform';
+//     const currentHandlerType = selectedConversation.current_handler_type || 'human';
+//     const aiEnabled = selectedConversation.ai_enabled ?? false;
+
+//     return (
+//         <div className="flex-1 flex flex-col bg-white">
+//             {/* Chat Header */}
+//             <div className="p-4 border-b border-gray-100 bg-white shadow-sm">
+//                 <div className="flex items-center justify-between">
+//                     <div className="flex items-center gap-3">
+//                         {isMobile && (
+//                             <button
+//                                 onClick={onBack}
+//                                 className="p-2 hover:bg-gray-100 rounded-lg text-gray-700 transition-colors"
+//                             >
+//                                 <ArrowLeft size={20} />
+//                             </button>
+//                         )}
+
+//                         <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20">
+//                             {customerName.charAt(0).toUpperCase()}
+//                         </div>
+
+//                         <div>
+//                             <div className="font-semibold text-gray-900 text-lg">{customerName}</div>
+//                             <div className="text-sm text-gray-500 flex items-center gap-2">
+//                                 {platformName}
+//                                 {currentHandlerType === 'ai' ? (
+//                                     <span className="flex items-center gap-1 text-purple-600 font-medium">
+//                                         <Bot size={14} />
+//                                         AI Active
+//                                     </span>
+//                                 ) : (
+//                                     <span className="flex items-center gap-1 text-emerald-600 font-medium">
+//                                         <User size={14} />
+//                                         Human
+//                                     </span>
+//                                 )}
+//                             </div>
+//                         </div>
+//                     </div>
+
+//                     <div className="flex items-center gap-2">
+//                         <button
+//                             onClick={handleToggleAI}
+//                             disabled={loading || isToggling}
+//                             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${aiEnabled
+//                                 ? 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg shadow-purple-500/25'
+//                                 : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+//                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
+//                         >
+//                             {isToggling ? (
+//                                 <span className="flex items-center gap-2">
+//                                     <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+//                                     {aiEnabled ? 'Disabling...' : 'Enabling...'}
+//                                 </span>
+//                             ) : (
+//                                 aiEnabled ? '🤖 Disable AI' : '✨ Enable AI'
+//                             )}
+//                         </button>
+//                         <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
+//                             <MoreHorizontal size={20} />
+//                         </button>
+//                     </div>
+//                 </div>
+//             </div>
+
+//             {/* Messages */}
+//             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
+//                 {messages && messages.length > 0 ? (
+//                     messages.map((message: Message) => {
+//                         if (!message || !message.id) return null;
+
+//                         const isOutbound: boolean = message.direction === 'outbound';
+//                         const isAI: boolean = message.sender_type === 'ai';
+//                         const isUnread: boolean = !message.is_read_by_current_user && message.direction === 'inbound';
+//                         const senderName = message.sender_name || (isAI ? 'AI Assistant' : 'Customer');
+
+//                         return (
+//                             <div
+//                                 key={message.id}
+//                                 className={`flex ${isOutbound ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+//                             >
+//                                 <div className={`max-w-[70%] ${isMobile ? 'max-w-[85%]' : ''}`}>
+//                                     {!isOutbound && (
+//                                         <div className="flex items-center gap-2 mb-2 text-xs text-gray-500">
+//                                             {isAI ? <Bot size={14} /> : <User size={14} />}
+//                                             <span className="font-medium">{senderName}</span>
+//                                             {isAI && <span className="text-purple-600 font-bold">✨ AI</span>}
+//                                         </div>
+//                                     )}
+
+//                                     <div
+//                                         className={`p-4 rounded-2xl shadow-sm ${isOutbound
+//                                             ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white'
+//                                             : isAI
+//                                                 ? `bg-gradient-to-r from-purple-50 to-pink-50 text-gray-900 border border-purple-200 ${isUnread ? 'ring-2 ring-orange-400' : ''}`
+//                                                 : `bg-white text-gray-900 border border-gray-200 ${isUnread ? 'ring-2 ring-orange-400' : ''}`
+//                                             }`}
+//                                     >
+//                                         {renderMessageContent(message.content_encrypted || '')}
+//                                     </div>
+
+//                                     <div className={`flex items-center gap-2 mt-2 text-xs text-gray-500 ${isOutbound ? 'justify-end' : 'justify-start'}`}>
+//                                         <span>{formatTime(message.platform_timestamp)}</span>
+//                                         {isOutbound && (
+//                                             <div className="flex items-center gap-1">
+//                                                 {message.delivery_status === 'sent' ? (
+//                                                     <CheckCircle2 size={14} className="text-green-500" />
+//                                                 ) : (
+//                                                     <Circle size={14} />
+//                                                 )}
+//                                             </div>
+//                                         )}
+//                                         {isUnread && (
+//                                             <span className="text-orange-600 font-bold">New</span>
+//                                         )}
+//                                     </div>
+//                                 </div>
+//                             </div>
+//                         );
+//                     })
+//                 ) : (
+//                     <div className="flex items-center justify-center h-full text-gray-500">
+//                         <div className="text-center">
+//                             <MessageCircle size={48} className="mx-auto mb-4 text-gray-300" />
+//                             <p>No messages yet</p>
+//                         </div>
+//                     </div>
+//                 )}
+//                 <div ref={messagesEndRef} />
+//             </div>
+
+//             {/* Message Input */}
+//             {currentHandlerType === 'human' ? (
+//                 <div className="p-6 border-t border-gray-100 bg-white">
+//                     <div className="flex items-end gap-3">
+//                         <div className="flex-1 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
+//                             <textarea
+//                                 value={newMessage}
+//                                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewMessage(e.target.value)}
+//                                 placeholder="Type your message..."
+//                                 className="w-full p-4 bg-transparent text-gray-900 placeholder-gray-500 resize-none focus:outline-none rounded-2xl"
+//                                 rows={3}
+//                                 onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+//                                     if (e.key === 'Enter' && !e.shiftKey) {
+//                                         e.preventDefault();
+//                                         sendMessage();
+//                                     }
+//                                 }}
+//                                 disabled={loading || isToggling}
+//                             />
+//                         </div>
+//                         <button
+//                             onClick={sendMessage}
+//                             disabled={loading || !newMessage.trim() || isToggling}
+//                             className="p-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl transition-all shadow-lg shadow-indigo-500/25 group"
+//                         >
+//                             <Send size={20} className="text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+//                         </button>
+//                     </div>
+//                 </div>
+//             ) : (
+//                 <div className="p-6 border-t border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50">
+//                     <div className="flex items-center justify-center gap-3 text-purple-700">
+//                         <Bot size={20} className="animate-pulse" />
+//                         <span className="font-medium">AI is handling this conversation</span>
+//                         <Sparkles size={16} className="text-purple-500" />
+//                     </div>
+//                 </div>
+//             )}
+//         </div>
+//     );
+// };
+
+// Updated ChatMessages component with clear visual distinctions
 const ChatMessages: React.FC<ChatMessagesProps> = ({
     selectedConversation,
     messages,
@@ -664,6 +921,36 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
         }
     };
 
+    // Helper function to get message styling based on sender type
+    const getMessageStyling = (message: Message) => {
+        const isCustomer = message.sender_type === 'customer';
+        const isAI = message.sender_type === 'ai';
+        const isHuman = message.sender_type === 'human';
+        const isUnread = !message.is_read_by_current_user && message.direction === 'inbound';
+
+        // Placement logic
+        let justifyClass = '';
+        if (isCustomer) {
+            justifyClass = 'justify-start'; // Customer messages on the left
+        } else if (isAI) {
+            justifyClass = 'justify-end'; // AI messages on the right
+        } else if (isHuman) {
+            justifyClass = 'justify-end'; // Human agent messages on the right (but styled differently from AI)
+        }
+
+        // Bubble styling
+        let bubbleClass = '';
+        if (isCustomer) {
+            bubbleClass = `bg-white text-gray-900 border border-gray-200 shadow-sm ${isUnread ? 'ring-2 ring-blue-400' : ''}`;
+        } else if (isAI) {
+            bubbleClass = `bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/25 ${isUnread ? 'ring-2 ring-purple-400' : ''}`;
+        } else if (isHuman) {
+            bubbleClass = `bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 ${isUnread ? 'ring-2 ring-emerald-400' : ''}`;
+        }
+
+        return { justifyClass, bubbleClass, isCustomer, isAI, isHuman };
+    };
+
     const handleToggleAI = async () => {
         if (!selectedConversation || isToggling) return;
 
@@ -672,7 +959,6 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
             await toggleAIControl();
         } catch (error) {
             console.error('Error toggling AI:', error);
-            // You might want to show a toast notification here
         } finally {
             setIsToggling(false);
         }
@@ -693,7 +979,6 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
         );
     }
 
-    // Additional safety checks
     const customerName = selectedConversation.customer_name || 'Unknown';
     const platformName = selectedConversation.platform_name || 'Unknown Platform';
     const currentHandlerType = selectedConversation.current_handler_type || 'human';
@@ -701,7 +986,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 
     return (
         <div className="flex-1 flex flex-col bg-white">
-            {/* Chat Header */}
+            {/* Chat Header - Keep existing header code */}
             <div className="p-4 border-b border-gray-100 bg-white shadow-sm">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -762,55 +1047,55 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                 </div>
             </div>
 
-            {/* Messages */}
+            {/* Messages - UPDATED with new styling logic */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
                 {messages && messages.length > 0 ? (
                     messages.map((message: Message) => {
                         if (!message || !message.id) return null;
 
-                        const isOutbound: boolean = message.direction === 'outbound';
-                        const isAI: boolean = message.sender_type === 'ai';
-                        const isUnread: boolean = !message.is_read_by_current_user && message.direction === 'inbound';
-                        const senderName = message.sender_name || (isAI ? 'AI Assistant' : 'Customer');
+                        const { justifyClass, bubbleClass, isCustomer, isAI, isHuman } = getMessageStyling(message);
+                        const isUnread = !message.is_read_by_current_user && message.direction === 'inbound';
+                        const senderName = message.sender_name || (isAI ? 'AI Assistant' : isHuman ? 'Agent' : 'Customer');
 
                         return (
                             <div
                                 key={message.id}
-                                className={`flex ${isOutbound ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+                                className={`flex ${justifyClass} animate-fadeIn`}
                             >
                                 <div className={`max-w-[70%] ${isMobile ? 'max-w-[85%]' : ''}`}>
-                                    {!isOutbound && (
-                                        <div className="flex items-center gap-2 mb-2 text-xs text-gray-500">
-                                            {isAI ? <Bot size={14} /> : <User size={14} />}
+                                    {/* Sender info - show for all message types but style differently */}
+                                    <div className={`flex items-center gap-2 mb-2 text-xs ${isCustomer ? 'justify-start' : 'justify-end'}`}>
+                                        <div className={`flex items-center gap-2 ${isCustomer ? 'text-gray-500' : isAI ? 'text-purple-200' : 'text-emerald-200'}`}>
+                                            {isCustomer && <User size={14} />}
+                                            {isAI && <Bot size={14} />}
+                                            {isHuman && <User size={14} />}
                                             <span className="font-medium">{senderName}</span>
-                                            {isAI && <span className="text-purple-600 font-bold">✨ AI</span>}
+                                            {isAI && <span className="text-purple-300 font-bold">✨ AI</span>}
+                                            {isHuman && <span className="text-emerald-300 font-bold">👤 Agent</span>}
                                         </div>
-                                    )}
+                                    </div>
 
-                                    <div
-                                        className={`p-4 rounded-2xl shadow-sm ${isOutbound
-                                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white'
-                                            : isAI
-                                                ? `bg-gradient-to-r from-purple-50 to-pink-50 text-gray-900 border border-purple-200 ${isUnread ? 'ring-2 ring-orange-400' : ''}`
-                                                : `bg-white text-gray-900 border border-gray-200 ${isUnread ? 'ring-2 ring-orange-400' : ''}`
-                                            }`}
-                                    >
+                                    {/* Message bubble */}
+                                    <div className={`p-4 rounded-2xl ${bubbleClass}`}>
                                         {renderMessageContent(message.content_encrypted || '')}
                                     </div>
 
-                                    <div className={`flex items-center gap-2 mt-2 text-xs text-gray-500 ${isOutbound ? 'justify-end' : 'justify-start'}`}>
+                                    {/* Message footer with timestamp and status */}
+                                    <div className={`flex items-center gap-2 mt-2 text-xs text-gray-500 ${isCustomer ? 'justify-start' : 'justify-end'}`}>
                                         <span>{formatTime(message.platform_timestamp)}</span>
-                                        {isOutbound && (
+                                        {(isAI || isHuman) && (
                                             <div className="flex items-center gap-1">
-                                                {message.delivery_status === 'sent' ? (
+                                                {message.delivery_status === 'delivered' || message.delivery_status === 'sent' ? (
                                                     <CheckCircle2 size={14} className="text-green-500" />
+                                                ) : message.delivery_status === 'sending' ? (
+                                                    <div className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin" />
                                                 ) : (
                                                     <Circle size={14} />
                                                 )}
                                             </div>
                                         )}
                                         {isUnread && (
-                                            <span className="text-orange-600 font-bold">New</span>
+                                            <span className={`font-bold ${isCustomer ? 'text-blue-600' : 'text-orange-600'}`}>New</span>
                                         )}
                                     </div>
                                 </div>
@@ -828,11 +1113,17 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Message Input */}
+            {/* Message Input - UPDATED to show current handler context */}
             {currentHandlerType === 'human' ? (
                 <div className="p-6 border-t border-gray-100 bg-white">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium">
+                            <User size={16} />
+                            <span>You're handling this conversation</span>
+                        </div>
+                    </div>
                     <div className="flex items-end gap-3">
-                        <div className="flex-1 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 transition-all">
+                        <div className="flex-1 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
                             <textarea
                                 value={newMessage}
                                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewMessage(e.target.value)}
@@ -851,7 +1142,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                         <button
                             onClick={sendMessage}
                             disabled={loading || !newMessage.trim() || isToggling}
-                            className="p-4 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl transition-all shadow-lg shadow-indigo-500/25 group"
+                            className="p-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl transition-all shadow-lg shadow-emerald-500/25 group"
                         >
                             <Send size={20} className="text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                         </button>
