@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { 
   MessageCircle, 
   BarChart3, 
@@ -14,14 +14,12 @@ import {
   Sparkles,
 } from 'lucide-react';
 
-
 interface MenuItem {
   id: string;
   icon: LucideIcon;
   label: string;
   count: number | null;
 }
-
 
 interface SidebarProps {
   activeTab: string;
@@ -30,7 +28,6 @@ interface SidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
-
 
 // Sidebar Component
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isMobile, isOpen, setIsOpen }) => {
@@ -42,6 +39,34 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isMob
     { id: 'documents', icon: FileText, label: 'Documents', count: null },
     { id: 'settings', icon: Settings, label: 'Settings', count: null }
   ];
+
+  // Add custom styles only on client-side
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      // Check if styles already exist to avoid duplicates
+      if (!document.querySelector('#custom-animations')) {
+        const style = document.createElement('style');
+        style.id = 'custom-animations';
+        style.textContent = `
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+              transform: translateY(10px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          
+          .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    }
+  }, []);
 
   return (
     <>
@@ -193,27 +218,3 @@ export const SettingsModule: React.FC = () => (
     </div>
   </div>
 );
-
-
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .animate-fadeIn {
-    animation: fadeIn 0.3s ease-out;
-  }
-`;
-document.head.appendChild(style);
-
-
-
-

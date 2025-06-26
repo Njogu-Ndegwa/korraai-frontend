@@ -96,7 +96,6 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ isMobile }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
   const [showMessages, setShowMessages] = useState<boolean>(!isMobile);
 
   const wsConversations = useRef<WebSocket | null>(null);
@@ -217,7 +216,6 @@ const mapApiMessageToState = (apiMsg: ApiMessage): Message => {
     if (!selectedConversation) return;
 
     setLoading(true);
-    setError(null);
     const newAiEnabledStatus = !selectedConversation.ai_enabled;
 
     try {
@@ -235,7 +233,6 @@ const mapApiMessageToState = (apiMsg: ApiMessage): Message => {
       );
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to toggle AI control.");
       // Optionally revert the change in UI on failure
     } finally {
       setLoading(false);
@@ -269,7 +266,6 @@ const mapApiMessageToState = (apiMsg: ApiMessage): Message => {
           body: JSON.stringify({ content: newMessage, message_type: 'text' })
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send message.");
       // Handle failed message state
       setMessages(prev => prev.map(m => 
           m.id === optimisticMessage.id ? { ...m, delivery_status: 'failed' } : m
