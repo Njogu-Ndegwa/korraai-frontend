@@ -90,7 +90,7 @@ interface ApiMessage {
     delivery_status: string;
 }
 import { authorizedFetch } from "../../authorizedFetch";
- const ChatModule: React.FC<ChatModuleProps> = ({ isMobile }) => {
+const ChatModule: React.FC<ChatModuleProps> = ({ isMobile }) => {
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -615,6 +615,7 @@ export const ChatList: React.FC<ChatListProps> = ({ conversations, selectedConve
 };
 
 // Updated ChatMessages component with sticky header like the AI banner
+// Updated ChatMessages component with fixed mobile AI toggle
 const ChatMessages: React.FC<ChatMessagesProps> = ({
     selectedConversation,
     messages,
@@ -730,60 +731,83 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 
     return (
         <div className={`flex flex-col bg-white ${isMobile ? 'h-screen' : 'flex-1'}`}>
-            {/* ✅ MOBILE NAVIGATION BAR - Same style as AI banner */}
+            {/* ✅ MOBILE NAVIGATION BAR - Enhanced with AI toggle and more options */}
             {isMobile && (
-                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-100 flex-shrink-0 p-3">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            {/* Back Button */}
-                            <button
-                                onClick={onBack}
-                                className="p-2 hover:bg-white/60 rounded-full text-indigo-700 transition-colors"
-                                aria-label="Go back to conversations list"
-                            >
-                                <ArrowLeft size={20} className="text-indigo-600" />
-                            </button>
-                            
-                            {/* Customer Avatar */}
-                            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                {customerName.charAt(0).toUpperCase()}
-                            </div>
-                            
-                            {/* Customer Name */}
-                            <div className="flex-1 min-w-0">
-                                <div className="font-semibold text-indigo-900 text-sm truncate">{customerName}</div>
-                                <div className="text-xs text-indigo-600 flex items-center gap-1">
-                                    {currentHandlerType === 'ai' ? (
-                                        <span className="flex items-center gap-1">
-                                            <Bot size={10} />
-                                            AI Active
-                                        </span>
-                                    ) : (
-                                        <span className="flex items-center gap-1">
-                                            <User size={10} />
-                                            Human
-                                        </span>
-                                    )}
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-100 flex-shrink-0">
+                    {/* Main header row */}
+                    <div className="p-3">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                {/* Back Button */}
+                                <button
+                                    onClick={onBack}
+                                    className="p-2 hover:bg-white/60 rounded-full text-indigo-700 transition-colors flex-shrink-0"
+                                    aria-label="Go back to conversations list"
+                                >
+                                    <ArrowLeft size={20} className="text-indigo-600" />
+                                </button>
+
+                                {/* Customer Avatar */}
+                                <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                    {customerName.charAt(0).toUpperCase()}
+                                </div>
+
+                                {/* Customer Name */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="font-semibold text-indigo-900 text-sm truncate">{customerName}</div>
+                                    <div className="text-xs text-indigo-600 flex items-center gap-1">
+                                        <span className="truncate">{platformName}</span>
+                                        <span className="text-indigo-400">•</span>
+                                        {currentHandlerType === 'ai' ? (
+                                            <span className="flex items-center gap-1 flex-shrink-0">
+                                                <Bot size={10} />
+                                                AI Active
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-1 flex-shrink-0">
+                                                <User size={10} />
+                                                Human
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* AI Toggle Button */}
-                        <button
-                            onClick={handleToggleAI}
-                            disabled={loading || isToggling}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiEnabled
-                                ? 'bg-purple-500 hover:bg-purple-600 text-white'
-                                : 'bg-white/60 hover:bg-white text-indigo-700'
-                                } disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                            {isToggling ? (
-                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                            ) : (
-                                aiEnabled ? '🤖 ON' : '✨ OFF'
-                            )}
-                        </button>
+                            {/* Action buttons */}
+                            <div className="flex items-center gap-2 flex-shrink-0">
+                                {/* AI Toggle Button */}
+                                <button
+                                    onClick={handleToggleAI}
+                                    disabled={loading || isToggling}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiEnabled
+                                        ? 'bg-purple-500 hover:bg-purple-600 text-white'
+                                        : 'bg-white/60 hover:bg-white text-indigo-700'
+                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    {isToggling ? (
+                                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                                    ) : (
+                                        aiEnabled ? '🤖 ON' : '✨ OFF'
+                                    )}
+                                </button>
+
+                                {/* More options button */}
+                                <button className="p-2 hover:bg-white/60 rounded-full text-indigo-700 transition-colors">
+                                    <MoreHorizontal size={16} className="text-indigo-600" />
+                                </button>
+                            </div>
+                        </div>
                     </div>
+
+                    {/* Optional: AI status banner for mobile */}
+                    {aiEnabled && (
+                        <div className="px-3 pb-2">
+                            <div className="bg-purple-100 border border-purple-200 rounded-lg px-3 py-2 flex items-center gap-2">
+                                <Bot size={14} className="text-purple-600 animate-pulse" />
+                                <span className="text-purple-700 font-medium text-xs">AI is actively responding to this customer</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
