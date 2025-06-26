@@ -423,7 +423,8 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ isMobile }) => {
 
     if (isMobile) {
         return (
-            <div className="h-full">
+            // ✅ FIX 8: Ensure proper height for mobile container
+            <div className="h-full overflow-hidden">
                 {!showMessages || !selectedConversation ? (
                     <ChatList
                         conversations={conversations}
@@ -871,6 +872,7 @@ export const ChatList: React.FC<ChatListProps> = ({ conversations, selectedConve
 // };
 
 // Updated ChatMessages component with clear visual distinctions
+// Updated ChatMessages component with mobile fixes
 const ChatMessages: React.FC<ChatMessagesProps> = ({
     selectedConversation,
     messages,
@@ -985,35 +987,38 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
     const aiEnabled = selectedConversation.ai_enabled ?? false;
 
     return (
-        <div className="flex-1 flex flex-col bg-white">
-            {/* Chat Header - Keep existing header code */}
-            <div className="p-4 border-b border-gray-100 bg-white shadow-sm">
+        // ✅ FIX 1: Add proper height constraints for mobile
+        <div className={`flex flex-col bg-white ${isMobile ? 'h-screen' : 'flex-1'}`}>
+            {/* Chat Header - ✅ FIX 2: Enhanced mobile header with prominent back button */}
+            <div className="p-4 border-b border-gray-100 bg-white shadow-sm flex-shrink-0">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
+                        {/* ✅ FIX 3: Make back button more prominent and always visible on mobile */}
                         {isMobile && (
                             <button
                                 onClick={onBack}
-                                className="p-2 hover:bg-gray-100 rounded-lg text-gray-700 transition-colors"
+                                className="p-2 hover:bg-gray-100 rounded-lg text-gray-700 transition-colors flex-shrink-0 mr-2"
+                                aria-label="Go back to conversations list"
                             >
-                                <ArrowLeft size={20} />
+                                <ArrowLeft size={24} className="text-gray-600" />
                             </button>
                         )}
 
-                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20">
+                        <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/20 flex-shrink-0">
                             {customerName.charAt(0).toUpperCase()}
                         </div>
 
-                        <div>
-                            <div className="font-semibold text-gray-900 text-lg">{customerName}</div>
+                        <div className="min-w-0 flex-1">
+                            <div className="font-semibold text-gray-900 text-lg truncate">{customerName}</div>
                             <div className="text-sm text-gray-500 flex items-center gap-2">
-                                {platformName}
+                                <span className="truncate">{platformName}</span>
                                 {currentHandlerType === 'ai' ? (
-                                    <span className="flex items-center gap-1 text-purple-600 font-medium">
+                                    <span className="flex items-center gap-1 text-purple-600 font-medium flex-shrink-0">
                                         <Bot size={14} />
                                         AI Active
                                     </span>
                                 ) : (
-                                    <span className="flex items-center gap-1 text-emerald-600 font-medium">
+                                    <span className="flex items-center gap-1 text-emerald-600 font-medium flex-shrink-0">
                                         <User size={14} />
                                         Human
                                     </span>
@@ -1022,11 +1027,12 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    {/* ✅ FIX 4: Responsive header actions */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                             onClick={handleToggleAI}
                             disabled={loading || isToggling}
-                            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${aiEnabled
+                            className={`${isMobile ? 'px-3 py-2 text-xs' : 'px-4 py-2 text-sm'} rounded-xl font-medium transition-all ${aiEnabled
                                 ? 'bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white shadow-lg shadow-purple-500/25'
                                 : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
@@ -1034,21 +1040,23 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                             {isToggling ? (
                                 <span className="flex items-center gap-2">
                                     <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                                    {aiEnabled ? 'Disabling...' : 'Enabling...'}
+                                    {isMobile ? (aiEnabled ? 'Off' : 'On') : (aiEnabled ? 'Disabling...' : 'Enabling...')}
                                 </span>
                             ) : (
-                                aiEnabled ? '🤖 Disable AI' : '✨ Enable AI'
+                                isMobile ? (aiEnabled ? '🤖 Off' : '✨ On') : (aiEnabled ? '🤖 Disable AI' : '✨ Enable AI')
                             )}
                         </button>
-                        <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
-                            <MoreHorizontal size={20} />
-                        </button>
+                        {!isMobile && (
+                            <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors">
+                                <MoreHorizontal size={20} />
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* Messages - UPDATED with new styling logic */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-50 to-white">
+            {/* Messages - ✅ FIX 5: Proper scroll container with mobile-optimized padding */}
+            <div className={`flex-1 overflow-y-auto space-y-4 bg-gradient-to-b from-gray-50 to-white ${isMobile ? 'p-4' : 'p-6'}`}>
                 {messages && messages.length > 0 ? (
                     messages.map((message: Message) => {
                         if (!message || !message.id) return null;
@@ -1076,7 +1084,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                     </div>
 
                                     {/* Message bubble */}
-                                    <div className={`p-4 rounded-2xl ${bubbleClass}`}>
+                                    <div className={`${isMobile ? 'p-3' : 'p-4'} rounded-2xl ${bubbleClass}`}>
                                         {renderMessageContent(message.content_encrypted || '')}
                                     </div>
 
@@ -1113,15 +1121,17 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Message Input - UPDATED to show current handler context */}
+            {/* Message Input - ✅ FIX 6: Mobile-optimized input with proper constraints */}
             {currentHandlerType === 'human' ? (
-                <div className="p-6 border-t border-gray-100 bg-white">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium">
-                            <User size={16} />
-                            <span>You're handling this conversation</span>
+                <div className={`border-t border-gray-100 bg-white flex-shrink-0 ${isMobile ? 'p-4' : 'p-6'}`}>
+                    {!isMobile && (
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium">
+                                <User size={16} />
+                                <span>You're handling this conversation</span>
+                            </div>
                         </div>
-                    </div>
+                    )}
                     <div className="flex items-end gap-3">
                         <div className="flex-1 bg-gray-50 rounded-2xl border border-gray-200 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
                             <textarea
@@ -1129,7 +1139,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setNewMessage(e.target.value)}
                                 placeholder="Type your message..."
                                 className="w-full p-4 bg-transparent text-gray-900 placeholder-gray-500 resize-none focus:outline-none rounded-2xl"
-                                rows={3}
+                                rows={isMobile ? 2 : 3}
                                 onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
                                     if (e.key === 'Enter' && !e.shiftKey) {
                                         e.preventDefault();
@@ -1142,14 +1152,14 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                         <button
                             onClick={sendMessage}
                             disabled={loading || !newMessage.trim() || isToggling}
-                            className="p-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl transition-all shadow-lg shadow-emerald-500/25 group"
+                            className={`bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-2xl transition-all shadow-lg shadow-emerald-500/25 group ${isMobile ? 'p-3' : 'p-4'}`}
                         >
-                            <Send size={20} className="text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                            <Send size={isMobile ? 18 : 20} className="text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                         </button>
                     </div>
                 </div>
             ) : (
-                <div className="p-6 border-t border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50">
+                <div className={`border-t border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50 flex-shrink-0 ${isMobile ? 'p-4' : 'p-6'}`}>
                     <div className="flex items-center justify-center gap-3 text-purple-700">
                         <Bot size={20} className="animate-pulse" />
                         <span className="font-medium">AI is handling this conversation</span>
