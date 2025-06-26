@@ -176,19 +176,41 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ isMobile }) => {
 
             wsConversations.current.onmessage = (event) => {
                 try {
-                    console.log('Received conversations message:', event.data);
+                    console.log('📨 Received conversations message:', event.data);
                     const response = JSON.parse(event.data);
+
                     if (response.type === 'conversation_list' && response.data?.results) {
                         const mappedConversations = response.data.results.map(mapApiConversationToState);
                         setConversations(prev => {
-                            // Merge the new conversation data into the existing state
                             const updatedConversations = new Map(prev.map(c => [c.id, c]));
                             mappedConversations.forEach((conv: Conversation) => updatedConversations.set(conv.id, conv));
                             return Array.from(updatedConversations.values());
                         });
+                    } else if (response.type === 'conversation_updated') {
+                        // Your backend sends 'conversation_updated'
+                        if (response.conversation) {
+                            const updatedConv = mapApiConversationToState(response.conversation);
+                            setConversations(prev => {
+                                const updated = prev.map(c => c.id === updatedConv.id ? updatedConv : c);
+                                if (!prev.find(c => c.id === updatedConv.id)) {
+                                    updated.push(updatedConv);
+                                }
+                                return updated;
+                            });
+
+                            setSelectedConversation(prev =>
+                                prev?.id === updatedConv.id ? updatedConv : prev
+                            );
+                            console.log(`🔄 Updated conversation: ${updatedConv.customer_name}`);
+                        }
+                    } else if (response.type === 'new_message') {
+                        // Handle new message notifications
+                        console.log(`📨 New message notification for conversation: ${response.conversation_id}`);
+                    } else {
+                        console.log('📥 Unknown conversation message type:', response.type, response);
                     }
                 } catch (parseError) {
-                    console.error("Error parsing conversations WebSocket message:", parseError, event.data);
+                    console.error("❌ Error parsing conversations WebSocket message:", parseError, event.data);
                 }
             };
 
@@ -208,81 +230,6 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ isMobile }) => {
             }
         };
     }, []);
-
-    // Enhanced messages WebSocket setup - replace your existing messages useEffect:
-    useEffect(() => {
-        // If no conversation is selected, close any existing message socket and clear messages
-        if (!selectedConversation) {
-            if (wsMessages.current) {
-                wsMessages.current.close(1000, "No conversation selected");
-            }
-            setMessages([]);
-            return;
-        }
-
-        console.log(`Setting up messages WebSocket for conversation: ${selectedConversation.id}`);
-        const wsUrl = `${WS_BASE_URL}/conversations/${selectedConversation.id}/messages/?user_id=${USER_ID}&tenant_id=${TENANT_ID}`;
-        console.log('Messages WebSocket URL:', wsUrl);
-
-        try {
-            wsMessages.current = new WebSocket(wsUrl);
-        } catch (error) {
-            console.error('Failed to create messages WebSocket:', error);
-            return;
-        }
-
-        wsMessages.current.onopen = () => {
-            console.log(`Messages WebSocket for ${selectedConversation.id} Connected successfully`);
-        };
-
-        wsMessages.current.onclose = (event) => {
-            console.log(`Messages WebSocket for ${selectedConversation.id} Disconnected`, {
-                code: event.code,
-                reason: event.reason,
-                wasClean: event.wasClean
-            });
-        };
-
-        wsMessages.current.onerror = (error) => {
-            console.error("Messages WebSocket Error Details:", {
-                error: error,
-                type: error.type,
-                conversationId: selectedConversation.id,
-                readyState: wsMessages.current?.readyState,
-                url: wsUrl
-            });
-        };
-
-        wsMessages.current.onmessage = (event) => {
-            try {
-                console.log('Received messages data:', event.data);
-                const response = JSON.parse(event.data);
-                if (response.type === 'messages_list' || response.type === 'message_update') {
-                    const data = response.data?.results || [response.data];
-                    const mappedMessages = data.map(mapApiMessageToState);
-
-                    setMessages(prevMessages => {
-                        const messageMap = new Map(prevMessages.map(m => [m.id, m]));
-                        mappedMessages.forEach((m: any) => messageMap.set(m.id, m));
-                        return Array.from(messageMap.values()).sort((a, b) =>
-                            new Date(a.platform_timestamp).getTime() - new Date(b.platform_timestamp).getTime()
-                        );
-                    });
-                }
-            } catch (parseError) {
-                console.error("Error parsing messages WebSocket message:", parseError, event.data);
-            }
-        };
-
-
-        // Cleanup on conversation change or component unmount
-        return () => {
-            if (wsMessages.current) {
-                console.log(`Closing messages WebSocket for conversation: ${selectedConversation.id}`);
-                wsMessages.current.close(1000, "Conversation changed");
-            }
-        };
-    }, [selectedConversation]);
 
     // Improved toggleAIControl with better error handling:
     const toggleAIControl = async (): Promise<void> => {
@@ -379,16 +326,46 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ isMobile }) => {
         wsMessages.current.onerror = (err) => console.error("Messages WS Error:", err);
 
         wsMessages.current.onmessage = (event) => {
-            const response = JSON.parse(event.data);
-            if (response.type === 'messages_list' || response.type === 'message_update') {
-                const data = response.data?.results || [response.data]; // Handle both list and single update
-                const mappedMessages = data.map(mapApiMessageToState);
+            try {
+                console.log('📨 Received messages data:', event.data);
+                const response = JSON.parse(event.data);
 
-                setMessages(prevMessages => {
-                    const messageMap = new Map(prevMessages.map(m => [m.id, m]));
-                    mappedMessages.forEach((m: any) => messageMap.set(m.id, m));
-                    return Array.from(messageMap.values()).sort((a, b) => new Date(a.platform_timestamp).getTime() - new Date(b.platform_timestamp).getTime());
-                });
+                if (response.type === 'messages_list') {
+                    if (response.data?.results) {
+                        const mappedMessages = response.data.results.map(mapApiMessageToState);
+                        const sortedMessages = mappedMessages.sort((a: any, b: any) =>
+                            new Date(a.platform_timestamp).getTime() - new Date(b.platform_timestamp).getTime()
+                        );
+                        setMessages(sortedMessages);
+                        console.log(`📋 Loaded messages list: ${mappedMessages.length} items`);
+                    }
+                } else if (response.type === 'new_message_received') {
+                    if (response.message) {
+                        const newMessage = mapApiMessageToState(response.message);
+                        setMessages(prevMessages => {
+                            const messageMap = new Map(prevMessages.map(m => [m.id, m]));
+                            messageMap.set(newMessage.id, newMessage);
+                            return Array.from(messageMap.values()).sort((a, b) =>
+                                new Date(a.platform_timestamp).getTime() - new Date(b.platform_timestamp).getTime()
+                            );
+                        });
+                        console.log(`📨 Received new message:`, newMessage.content_encrypted?.substring(0, 50) + '...');
+                    }
+                } else if (response.type === 'message_update') {
+                    const data = response.data?.results || [response.data];
+                    const mappedMessages = data.map(mapApiMessageToState);
+                    setMessages(prevMessages => {
+                        const messageMap = new Map(prevMessages.map(m => [m.id, m]));
+                        mappedMessages.forEach((m: any) => messageMap.set(m.id, m));
+                        return Array.from(messageMap.values()).sort((a, b) =>
+                            new Date(a.platform_timestamp).getTime() - new Date(b.platform_timestamp).getTime()
+                        );
+                    });
+                } else {
+                    console.log('📥 Unknown message type:', response.type, response);
+                }
+            } catch (parseError) {
+                console.error("❌ Error parsing messages WebSocket message:", parseError, event.data);
             }
         };
 
@@ -409,91 +386,6 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ isMobile }) => {
         setShowMessages(false);
         setSelectedConversation(null);
     };
-
-    // Replace your existing toggleAIControl function with this improved version:
-
-    // const toggleAIControl = async (): Promise<void> => {
-    //   if (!selectedConversation) return;
-
-    //   setLoading(true);
-    //   const newAiEnabledStatus = !selectedConversation.ai_enabled;
-
-    //   try {
-    //     const response = await authorizedFetch(`/conversations/${selectedConversation.id}/ai-control/`, {
-    //       method: 'PUT',
-    //       body: JSON.stringify({ ai_enabled: newAiEnabledStatus })
-    //     });
-
-    //     const updatedConv = mapApiConversationToState(response.conversation);
-
-    //     // Update the selected conversation and the list
-    //     setSelectedConversation(updatedConv);
-    //     setConversations(prev =>
-    //       prev.map(c => c.id === updatedConv.id ? updatedConv : c)
-    //     );
-
-    //     // Force WebSocket reconnection after AI toggle
-    //     // Close existing message WebSocket
-    //     if (wsMessages.current) {
-    //       wsMessages.current.close();
-    //       wsMessages.current = null;
-    //     }
-
-    //     // Small delay to ensure clean disconnection
-    //     setTimeout(() => {
-    //       // Reconnect to messages WebSocket with updated conversation state
-    //       const wsUrl = `${WS_BASE_URL}/conversations/${updatedConv.id}/messages/?user_id=${USER_ID}&tenant_id=${TENANT_ID}`;
-    //       wsMessages.current = new WebSocket(wsUrl);
-
-    //       wsMessages.current.onopen = () => console.log(`Messages WebSocket for ${updatedConv.id} Reconnected after AI toggle`);
-    //       wsMessages.current.onclose = () => console.log(`Messages WebSocket for ${updatedConv.id} Disconnected`);
-    //       wsMessages.current.onerror = (err) => {
-    //         console.error("Messages WS Error after AI toggle:", err);
-    //         // Retry connection once after error
-    //         setTimeout(() => {
-    //           if (wsMessages.current?.readyState === WebSocket.CLOSED) {
-    //             wsMessages.current = new WebSocket(wsUrl);
-    //             wsMessages.current.onopen = () => console.log(`Messages WebSocket retry successful`);
-    //             wsMessages.current.onerror = (retryErr) => console.error("Messages WS Retry failed:", retryErr);
-    //             wsMessages.current.onmessage = (event) => {
-    //               const response = JSON.parse(event.data);
-    //               if (response.type === 'messages_list' || response.type === 'message_update') {
-    //                 const data = response.data?.results || [response.data];
-    //                 const mappedMessages = data.map(mapApiMessageToState);
-
-    //                 setMessages(prevMessages => {
-    //                   const messageMap = new Map(prevMessages.map(m => [m.id, m]));
-    //                   mappedMessages.forEach((m: any) => messageMap.set(m.id, m));
-    //                   return Array.from(messageMap.values()).sort((a, b) => new Date(a.platform_timestamp).getTime() - new Date(b.platform_timestamp).getTime());
-    //                 });
-    //               }
-    //             };
-    //           }
-    //         }, 1000);
-    //       };
-
-    //       wsMessages.current.onmessage = (event) => {
-    //         const response = JSON.parse(event.data);
-    //         if (response.type === 'messages_list' || response.type === 'message_update') {
-    //           const data = response.data?.results || [response.data];
-    //           const mappedMessages = data.map(mapApiMessageToState);
-
-    //           setMessages(prevMessages => {
-    //             const messageMap = new Map(prevMessages.map(m => [m.id, m]));
-    //             mappedMessages.forEach((m: any) => messageMap.set(m.id, m));
-    //             return Array.from(messageMap.values()).sort((a, b) => new Date(a.platform_timestamp).getTime() - new Date(b.platform_timestamp).getTime());
-    //           });
-    //         }
-    //       };
-    //     }, 100);
-
-    //   } catch (err) {
-    //     console.error('Error toggling AI control:', err);
-    //     // Optionally show user-friendly error message
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
 
     const sendMessage = async (): Promise<void> => {
         if (!newMessage.trim() || !selectedConversation) return;
