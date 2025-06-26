@@ -1,6 +1,5 @@
 'use client'
 
-
 import React from 'react';
 import { 
   MessageCircle, 
@@ -9,16 +8,10 @@ import {
   Settings, 
   Users, 
   Phone,
-  Menu,
   X,
-  Bot,
-  Bell,
   LucideIcon,
   MoreHorizontal,
   Sparkles,
-  TrendingUp,
-  Clock,
-  Zap
 } from 'lucide-react';
 
 
@@ -29,13 +22,6 @@ interface MenuItem {
   count: number | null;
 }
 
-interface Stat {
-  label: string;
-  value: string;
-  change: string;
-  color: string;
-  icon: LucideIcon;
-}
 
 interface SidebarProps {
   activeTab: string;
@@ -45,11 +31,6 @@ interface SidebarProps {
   setIsOpen: (open: boolean) => void;
 }
 
-
-// Constants
-const BEARER_TOKEN: string = 'your-bearer-token';
-const USER_ID: string = '88280a92-7ab2-45ed-96b8-cc2fbd2ee539';
-const TENANT_ID: string = '49592c05-e4f6-4ae1-ba21-9e5034171ffa';
 
 // Sidebar Component
 export const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab, isMobile, isOpen, setIsOpen }) => {
