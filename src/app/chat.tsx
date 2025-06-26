@@ -614,7 +614,7 @@ export const ChatList: React.FC<ChatListProps> = ({ conversations, selectedConve
     );
 };
 
-// Updated ChatMessages component with properly visible mobile navigation
+// Updated ChatMessages component with sticky header like the AI banner
 const ChatMessages: React.FC<ChatMessagesProps> = ({
     selectedConversation,
     messages,
@@ -730,62 +730,65 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
 
     return (
         <div className={`flex flex-col bg-white ${isMobile ? 'h-screen' : 'flex-1'}`}>
-            {/* ✅ MOBILE: Compact header with back button integrated */}
-            {isMobile ? (
-                <div className="bg-white border-b border-gray-200 shadow-sm flex-shrink-0 p-3">
-                    <div className="flex items-center gap-3">
-                        {/* Back Button - prominently visible */}
-                        <button
-                            onClick={onBack}
-                            className="p-2 hover:bg-gray-100 rounded-full text-gray-700 transition-colors flex-shrink-0"
-                            aria-label="Go back to conversations list"
-                        >
-                            <ArrowLeft size={24} className="text-gray-700" />
-                        </button>
-
-                        {/* Customer Avatar */}
-                        <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold shadow-md flex-shrink-0">
-                            {customerName.charAt(0).toUpperCase()}
-                        </div>
-
-                        {/* Customer Info */}
-                        <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-gray-900 text-base truncate">{customerName}</div>
-                            <div className="text-xs text-gray-500 flex items-center gap-1">
-                                <span className="truncate">{platformName}</span>
-                                {currentHandlerType === 'ai' ? (
-                                    <span className="flex items-center gap-1 text-purple-600 font-medium">
-                                        <Bot size={12} />
-                                        AI
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center gap-1 text-emerald-600 font-medium">
-                                        <User size={12} />
-                                        Human
-                                    </span>
-                                )}
+            {/* ✅ MOBILE NAVIGATION BAR - Same style as AI banner */}
+            {isMobile && (
+                <div className="bg-gradient-to-r from-indigo-50 to-purple-50 border-b border-indigo-100 flex-shrink-0 p-3">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            {/* Back Button */}
+                            <button
+                                onClick={onBack}
+                                className="p-2 hover:bg-white/60 rounded-full text-indigo-700 transition-colors"
+                                aria-label="Go back to conversations list"
+                            >
+                                <ArrowLeft size={20} className="text-indigo-600" />
+                            </button>
+                            
+                            {/* Customer Avatar */}
+                            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                {customerName.charAt(0).toUpperCase()}
+                            </div>
+                            
+                            {/* Customer Name */}
+                            <div className="flex-1 min-w-0">
+                                <div className="font-semibold text-indigo-900 text-sm truncate">{customerName}</div>
+                                <div className="text-xs text-indigo-600 flex items-center gap-1">
+                                    {currentHandlerType === 'ai' ? (
+                                        <span className="flex items-center gap-1">
+                                            <Bot size={10} />
+                                            AI Active
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center gap-1">
+                                            <User size={10} />
+                                            Human
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
-                        {/* AI Toggle Button - Mobile optimized */}
+                        {/* AI Toggle Button */}
                         <button
                             onClick={handleToggleAI}
                             disabled={loading || isToggling}
-                            className={`px-3 py-2 rounded-lg text-xs font-medium transition-all flex-shrink-0 ${aiEnabled
+                            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${aiEnabled
                                 ? 'bg-purple-500 hover:bg-purple-600 text-white'
-                                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                                : 'bg-white/60 hover:bg-white text-indigo-700'
                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             {isToggling ? (
                                 <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                             ) : (
-                                aiEnabled ? '🤖' : '✨'
+                                aiEnabled ? '🤖 ON' : '✨ OFF'
                             )}
                         </button>
                     </div>
                 </div>
-            ) : (
-                /* ✅ DESKTOP: Original header layout */
+            )}
+
+            {/* ✅ DESKTOP: Original header layout */}
+            {!isMobile && (
                 <div className="p-4 border-b border-gray-100 bg-white shadow-sm flex-shrink-0">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -950,6 +953,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
                     </div>
                 </div>
             ) : (
+                /* ✅ AI Banner - Same design pattern used for mobile nav */
                 <div className={`border-t border-gray-100 bg-gradient-to-r from-purple-50 to-pink-50 flex-shrink-0 ${isMobile ? 'p-3' : 'p-6'}`}>
                     <div className="flex items-center justify-center gap-3 text-purple-700">
                         <Bot size={20} className="animate-pulse" />
