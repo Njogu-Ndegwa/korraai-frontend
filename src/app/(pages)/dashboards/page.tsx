@@ -91,7 +91,7 @@ interface StatusOverview {
         };
     };
 }
-const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUxNTIzMjYyLCJpYXQiOjE3NTA5MTg0NjIsImp0aSI6IjM0YjNkOTFiZTVhYTRjODg5YmYyNzg3NWZhYjJlZDE2IiwidXNlcl9pZCI6Ijg4MjgwYTkyLTdhYjItNDVlZC05NmI4LWNjMmZiZDJlZTUzOSIsInRlbmFudF9pZCI6IjQ5NTkyYzA1LWU0ZjYtNGFlMS1iYTIxLTllNTAzNDE3MWZmYSIsInRlbmFudF9uYW1lIjoiU3ByaW5nIEludGVybmF0aW9uYWwgVHJhaW5pbmcgQ29sbGVnZSIsInVzZXJfcm9sZSI6ImFkbWluIiwiZW1haWwiOiJhZG1pbkBzaXRjLmNvbSJ9.VNkG8vgKRxptjK7WZX_vDN33Wg61JA5uqtKy3PSyQxI"
+const token = localStorage.getItem('access_token') || '';
 const DashboardContent = () => {
     const [realTimeData, setRealTimeData] = useState<any>(null);
     const [statusData, setStatusData] = useState<StatusOverview | null>(null);
