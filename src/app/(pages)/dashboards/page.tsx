@@ -92,6 +92,7 @@ interface StatusOverview {
     };
 }
 const token = localStorage.getItem('access_token') || '';
+console.log(token, "-----95----");
 const DashboardContent = () => {
     const [realTimeData, setRealTimeData] = useState<any>(null);
     const [statusData, setStatusData] = useState<StatusOverview | null>(null);

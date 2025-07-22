@@ -110,7 +110,7 @@ export const ChatModule: React.FC<ChatModuleProps> = ({ isMobile }) => {
     const [wsConnectionStatus, setWsConnectionStatus] = useState<'connecting' | 'connected' | 'disconnected' | 'error'>('disconnected');
     const [connectionRetries, setConnectionRetries] = useState(0);
     const maxRetries = 3;
-
+    const token = localStorage.getItem('access_token') || '';
     // Enhanced conversations WebSocket setup
     useEffect(() => {
         let retryTimeout: NodeJS.Timeout;
